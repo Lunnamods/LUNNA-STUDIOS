@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comunidade VIP</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Estilos rápidos específicos para a comunidade ficar organizada */
+        .form-comunidade { background: #1a1a1e; padding: 1.5rem; border-radius: 8px; border: 1px solid #323238; margin-bottom: 2rem; }
+        .form-comunidade input, .form-comunidade textarea, .form-comunidade select { width: 100%; padding: 0.8rem; background: #121214; border: 1px solid #323238; color: #fff; border-radius: 4px; margin-bottom: 1rem; font-family: inherit; }
+        .form-comunidade button { background: #8257e5; color: #fff; border: none; padding: 0.8rem 1.5rem; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        .form-comunidade button:hover { background: #9466ff; }
+        .post-comunidade { background: #1a1a1e; border: 1px solid #323238; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .badge-tipo { padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; margin-bottom: 0.5rem; }
+        .badge-comentario { background: #323238; color: #fff; }
+        .badge-video { background: #ff0000; color: #fff; }
+        .badge-script { background: #04d361; color: #000; }
+        .codigo-script { background: #121214; border: 1px solid #323238; padding: 1rem; border-radius: 4px; font-family: monospace; color: #e1e1e6; overflow-x: auto; white-space: pre-wrap; display: block; margin-top: 0.5rem; }
+        .video-container { margin-top: 0.5rem; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 4px; border: none; }
+    </style>
+</head>
+<body>
+
+    <nav id="sidebar" class="sidebar-fechada">
+        <button id="btn-menu">☰</button>
+        <ul class="menu-links">
+            <li><a href="/">🏠 <span>Início</span></a></li>
+            <li><a href="/galeria">🖼️ <span>Galeria</span></a></li>
+            <li><a href="/apoie">🤝 <span>Apoie</span></a></li>
+            <li><a href="/comunidade">💬 <span>Comunidade</span></a></li>
+            <li><a href="/admin">⚙️ <span>Admin</span></a></li>
+        </ul>
+    </nav>
+
+    <div id="conteudo-principal" style="display: flex; flex-direction: column; min-height: 100vh;">
+        
+        <div style="flex: 1;">
+            <header>
+                <h1>💬 Comunidade do Jogo</h1>
+                <p>Compartilhe ideias, assista a vídeos dos membros e baixe scripts de doações.</p>
+            </header>
+
+            <section class="form-comunidade">
+                <h3>Criar uma nova publicação</h3>
+                <form action="/comunidade/postar" method="POST">
+                    <label for="autor">Seu Nome / Apelido:</label>
+                    <input type="text" name="autor" placeholder="Ex: Gamedev_Apoiador" required>
+
+                    <label for="tipo">O que você quer compartilhar?</label>
+                    <select name="tipo" id="tipo-post" required>
+                        <option value="comentario">💬 Apenas um Comentário / Ideia</option>
+                        <option value="video">🎥 Link de Vídeo (YouTube)</option>
+                        <option value="script">💻 Doação de Script / Código</option>
+                    </select>
+
+                    <label for="titulo">Título da Publicação:</label>
+                    <input type="text" name="titulo" placeholder="Ex: Script de Movimentação 2D / Olha esse Bug!" required>
+
+                    <label for="conteudo">Conteúdo / Descrição / Código:</label>
+                    <textarea name="conteudo" rows="5" placeholder="Escreva aqui sua mensagem ou cole o código do seu script..." required></textarea>
+
+                    <button type="submit">Publicar na Comunidade</button>
+                </form>
+            </section>
+
+            <main class="feed-comunidade">
+                <% if (postsComunidade && postsComunidade.length > 0) { %>
+                    <% postsComunidade.forEach(post => { %>
+                        <div class="post-comunidade">
+                            <span class="badge-tipo badge-<%= post.tipo %>"><%= post.tipo %></span>
+                            
+                            <h2 style="margin: 0.5rem 0;"><%= post.titulo %></h2>
+                            <p style="font-size: 0.85rem; color: #8d8d99; margin-bottom: 1rem;">Postado por <strong><%= post.autor %></strong> em <%= post.data %></p>
+                            
+                            <% if (post.tipo === 'comentario') { %>
+                                <p style="line-height: 1.6;"><%= post.conteudo %></p>
+                            <% } %>
+
+                            <% if (post.tipo === 'video') { %>
+                                <p style="margin-bottom: 0.5rem;"><%= post.conteudo %></p>
+                                <% if (post.conteudo.includes('youtube.com/watch?v=')) { 
+                                    let videoId = post.conteudo.split('v=')[1]?.split('&')[0]; %>
+                                    <div class="video-container">
+                                        <iframe src="https://www.youtube.com/embed/<%= videoId %>" allowfullscreen></iframe>
+                                    </div>
+                                <% } else if (post.conteudo.includes('youtu.be/')) { 
+                                    let videoId = post.conteudo.split('youtu.be/')[1]?.split('?')[0]; %>
+                                    <div class="video-container">
+                                        <iframe src="https://www.youtube.com/embed/<%= videoId %>" allowfullscreen></iframe>
+                                    </div>
+                                <% } else { %>
+                                    <a href="<%= post.conteudo %>" target="_blank" style="color: #ff0000; font-weight: bold;">📺 Assistir Vídeo Externo</a>
+                                <% } %>
+                            <% } %>
+
+                            <% if (post.tipo === 'script') { %>
+                                <p>Código do script compartilhado:</p>
+                                <pre class="codigo-script"><code><%= post.conteudo %></code></pre>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p style="text-align: center; color: #8d8d99; margin-top: 3rem;">Ainda não há posts na comunidade. Seja o primeiro a compartilhar algo!</p>
+                <% } %>
+            </main>
+        </div>
+
+        <footer style="width: 100%; max-width: 1200px; margin: 4rem auto 2rem auto; padding-top: 2rem; border-top: 1px solid #323238; text-align: center; color: #8d8d99; font-size: 0.85rem; clear: both;">
+    <p style="margin-bottom: 1.5rem;">Siga as redes oficiais do jogo para não perder nenhuma novidade!</p>
+    
+    <div style="display: flex; justify-content: center; gap: 3rem;">
+        <a href="https://instagram.com/SEU_PERFIL" target="_blank" title="Instagram" class="social-link instagram">
+            <i class="fa-brands fa-instagram"></i>
+        </a>
+        <a href="https://youtube.com/SEU_CANAL" target="_blank" title="YouTube" class="social-link youtube">
+            <i class="fa-brands fa-youtube"></i>
+        </a>
+        <a href="https://twitch.tv/SEU_CANAL" target="_blank" title="Twitch" class="social-link twitch">
+            <i class="fa-brands fa-twitch"></i>
+        </a>
+        <a href="https://x.com/SEU_PERFIL" target="_blank" title="Twitter / X" class="social-link twitter">
+            <i class="fa-brands fa-x-twitter"></i>
+        </a>
+        <a href="https://discord.gg/SEU_SERVIDOR" target="_blank" title="Discord" class="social-link discord">
+            <i class="fa-brands fa-discord"></i>
+        </a>
+    </div>
+    
+    <p style="margin-top: 1.5rem; font-size: 0.75rem; color: #41414c;">© 2026 Devlog Gamedev. Todos os direitos reservados.</p>
+</footer>
+
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const btnMenu = document.getElementById('btn-menu');
+        btnMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-fechada');
+        });
+    </script>
+</body>
+</html>

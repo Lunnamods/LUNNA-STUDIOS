@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Desenvolvedor</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+      <nav id="sidebar" class="sidebar-fechada">
+    <button id="btn-menu">☰</button>
+    <ul class="menu-links">
+        <li><a href="/">🏠 <span>Início</span></a></li>
+        <li><a href="/galeria">🖼️ <span>Galeria</span></a></li>
+        <li><a href="/admin">⚙️ <span>Admin</span></a></li>
+    </ul>
+     </nav>
+
+    <div id="conteudo-principal">
+        <header>
+            <h1>⚙️ Painel de Controle</h1>
+            <p>Publique novas atualizações do jogo sem mexer no código.</p>
+        </header>
+
+        <div class="container-admin">
+            <div class="card-admin">
+                <h2>📝 Novo Post no Devlog</h2>
+                <form action="/admin/novo-post" method="POST" class="form-admin">
+                    <label>Versão do Jogo:</label>
+                    <input type="text" name="versao" placeholder="Ex: v0.1.2" required>
+
+                    <label>Título da Atualização:</label>
+                    <input type="text" name="titulo" placeholder="O que você fez hoje?" required>
+
+                    <label>Conteúdo / Explicação:</label>
+                    <textarea name="conteudo" rows="5" placeholder="Conte os detalhes, bugs e soluções..." required></textarea>
+
+                    <label>Caminho da Imagem/GIF (opcional):</label>
+                    <input type="text" name="imagem" placeholder="Ex: /imagens/print1.png">
+
+                    <button type="submit">Publicar na Linha do Tempo</button>
+                </form>
+            </div>
+
+            <div class="card-admin">
+                <h2>🖼️ Nova Foto na Galeria</h2>
+                <form action="/admin/nova-foto" method="POST" class="form-admin">
+                    <label>Título da Imagem:</label>
+                    <input type="text" name="titulo" placeholder="Ex: Sprite do Boss Final" required>
+
+                    <label>Caminho da Imagem:</label>
+                    <input type="text" name="url" placeholder="Ex: /imagens/boss.png" required>
+
+                    <button type="submit" class="btn-azul">Publicar na Galeria</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const btnMenu = document.getElementById('btn-menu');
+        btnMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-fechada');
+        });
+    </script>
+</body>
+</html>

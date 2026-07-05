@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria de Fotos</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- BIBLIOTECA DE ÍCONES (FONT AWESOME) ADICIONADA -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Estilos rápidos para manter a galeria organizada antes do footer */
+        .container-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .card-galeria { background: #1a1a1e; border: 1px solid #323238; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+        .card-galeria img { width: 100%; height: 220px; object-fit: cover; background: #121214; }
+        .info-galeria { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .acoes-galeria { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; }
+        .btn-like { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #ff3366; display: flex; align-items: center; gap: 0.3rem; }
+        .secao-comentarios { margin-top: 1rem; border-top: 1px solid #29292e; padding-top: 1rem; }
+        .lista-comentarios { max-height: 120px; overflow-y: auto; font-size: 0.85rem; color: #c4c4cc; margin-bottom: 0.8rem; list-style: none; padding: 0; }
+        .lista-comentarios li { background: #121214; padding: 0.4rem 0.6rem; border-radius: 4px; margin-bottom: 0.4rem; }
+        .form-comentario-galeria { display: flex; gap: 0.5rem; }
+        .form-comentario-galeria input { flex: 1; padding: 0.5rem; background: #121214; border: 1px solid #323238; color: #fff; border-radius: 4px; font-size: 0.85rem; }
+        .form-comentario-galeria button { background: #8257e5; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .form-comentario-galeria button:hover { background: #9466ff; }
+
+        /* ESTILIZAÇÃO DO RODAPÉ (FALTA ESSA PARTE NO SEU) */
+        .social-link { text-decoration: none; font-size: 1.8rem; color: #8d8d99; transition: all 0.3s ease; display: inline-block; }
+        .social-link.instagram:hover { color: #e1306c; transform: scale(1.2); }
+        .social-link.youtube:hover { color: #ff0000; transform: scale(1.2); }
+        .social-link.twitch:hover { color: #9146ff; transform: scale(1.2); }
+        .social-link.twitter:hover { color: #ffffff; transform: scale(1.2); }
+        .social-link.discord:hover { color: #5865F2; transform: scale(1.2); }
+    </style>
+</head>
+<body>
+
+    <nav id="sidebar" class="sidebar-fechada">
+        <button id="btn-menu">☰</button>
+        <ul class="menu-links">
+            <li><a href="/">🏠 <span>Início</span></a></li>
+            <li><a href="/galeria">🖼️ <span>Galeria</span></a></li>
+            <li><a href="/apoie">🤝 <span>Apoie</span></a></li>
+            <li><a href="/comunidade">💬 <span>Comunidade</span></a></li>
+            <li><a href="/admin">⚙️ <span>Admin</span></a></li>
+        </ul>
+    </nav>
+
+    <div id="conteudo-principal" style="display: flex; flex-direction: column; min-height: 100vh;">
+        
+        <div style="flex: 1;">
+            <header>
+                <h1>🖼️ Galeria de Fotos do Desenvolvimento</h1>
+                <p>Veja os bastidores da modelagem, concepts e cenários do nosso jogo.</p>
+            </header>
+
+            <section class="container-galeria">
+                <% if (fotos && fotos.length > 0) { %>
+                    <% fotos.forEach(foto => { %>
+                        <div class="card-galeria">
+                            <img src="<%= foto.url %>" alt="<%= foto.titulo %>">
+                            <div class="info-galeria">
+                                <div>
+                                    <h3 style="color: #fff; margin-bottom: 0.5rem;"><%= foto.titulo %></h3>
+                                    
+                                    <div class="acoes-galeria">
+                                        <form action="/galeria/like/<%= foto.id %>" method="POST">
+                                            <button type="submit" class="btn-like">❤️ <span><%= foto.likes %></span></button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="secao-comentarios">
+                                    <ul class="lista-comentarios">
+                                        <% if (foto.comentarios && foto.comentarios.length > 0) { %>
+                                            <% foto.comentarios.forEach(comentario => { %>
+                                                <li>💬 <%= comentario %></li>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <li style="color: #7c7c8a; font-style: italic; background: none; padding: 0;">Nenhum comentário ainda...</li>
+                                        <% } %>
+                                    </ul>
+
+                                    <form action="/galeria/comentar/<%= foto.id %>" method="POST" class="form-comentario-galeria">
+                                        <input type="text" name="comentario" placeholder="Deixe um comentário..." required>
+                                        <button type="submit">Enviar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p style="grid-column: 1/-1; text-align: center; color: #8d8d99; margin-top: 3rem;">Nenhuma imagem foi postada na galeria ainda.</p>
+                <% } %>
+            </section>
+        </div>
+
+        <footer style="width: 100%; max-width: 1200px; margin: 4rem auto 2rem auto; padding-top: 2rem; border-top: 1px solid #323238; text-align: center; color: #8d8d99; font-size: 0.85rem; clear: both;">
+            <p style="margin-bottom: 1.5rem;">Siga as redes oficiais do jogo para não perder nenhuma novidade!</p>
+            
+            <div style="display: flex; justify-content: center; gap: 3rem;">
+                <a href="https://instagram.com/SEU_PERFIL" target="_blank" title="Instagram" class="social-link instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://youtube.com/SEU_CANAL" target="_blank" title="YouTube" class="social-link youtube">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <a href="https://twitch.tv/SEU_CANAL" target="_blank" title="Twitch" class="social-link twitch">
+                    <i class="fa-brands fa-twitch"></i>
+                </a>
+                <a href="https://x.com/SEU_PERFIL" target="_blank" title="Twitter / X" class="social-link twitter">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+                <a href="https://discord.gg/SEU_SERVIDOR" target="_blank" title="Discord" class="social-link discord">
+                    <i class="fa-brands fa-discord"></i>
+                </a>
+            </div>
+            
+            <p style="margin-top: 1.5rem; font-size: 0.75rem; color: #41414c;">© 2026 Devlog Gamedev. Todos os direitos reservados.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const btnMenu = document.getElementById('btn-menu');
+        btnMenu.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-fechada');
+        });
+    </script>
+</body>
+</html>

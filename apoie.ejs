@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apoie o Jogo</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- BIBLIOTECA DE ÍCONES (FONT AWESOME) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Organização dos Cards Lado a Lado */
+        .container-apoio { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin-top: 2rem; padding: 0 1rem; }
+        .card-apoio { background: #1a1a1e; border: 1px solid #323238; border-radius: 8px; padding: 2rem; width: 100%; max-width: 320px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, border-color 0.2s; box-sizing: border-box; }
+        .card-apoio:hover { transform: translateY(-5px); border-color: #8257e5; }
+        .card-apoio h2 { color: #fff; font-size: 1.4rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .preco { font-size: 1.8rem; font-weight: bold; color: #04d361; margin-bottom: 1.5rem; }
+        .card-apoio ul { list-style: none; padding: 0; margin-bottom: 2rem; flex: 1; }
+        .card-apoio ul li { color: #c4c4cc; font-size: 0.95rem; margin-bottom: 0.8rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+        
+        /* Layout dos botões integrados */
+        .btn-checkout { width: 100%; height: 38px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; margin-top: 0.5rem; transition: background-color 0.2s; }
+        .btn-pix { background-color: #323238; border: 1px solid #41414c; color: #fff; }
+        .btn-pix:hover { background-color: #41414c; }
+        
+        /* Rodapé Premium */
+        .social-link { text-decoration: none; font-size: 1.8rem; color: #8d8d99; transition: all 0.3s ease; display: inline-block; }
+        .social-link.instagram:hover { color: #e1306c; transform: scale(1.2); }
+        .social-link.youtube:hover { color: #ff0000; transform: scale(1.2); }
+        .social-link.twitch:hover { color: #9146ff; transform: scale(1.2); }
+        .social-link.twitter:hover { color: #ffffff; transform: scale(1.2); }
+        .social-link.discord:hover { color: #5865F2; transform: scale(1.2); }
+
+        /* ESTILOS DA ARENA DE ANIMAÇÃO DA BARRA */
+        .container-meta-game { width: 100%; position: relative; padding-top: 110px; margin-top: 1rem; }
+        .actor { position: absolute; bottom: 14px; display: none; z-index: 10; width: 70px; height: 85px; transition: all 0.1s ease; }
+        #player-actor { left: -85px; }
+        #zombie-actor { right: -85px; }
+
+        /* Ajustado para manter distância social de combate */
+        @keyframes zombieRun { 0% { right: -85px; } 100% { right: 20%; } }
+        @keyframes playerRun { 0% { left: -85px; } 100% { left: 20%; } }
+
+        /* Estilo dinâmico para a placa com o texto da cura */
+        .placa-cura {
+            position: absolute; bottom: 95px; right: 10%; width: 200px;
+            background: #f4eae1; border: 2px solid #78350f; border-radius: 6px;
+            padding: 8px; color: #451a03; font-family: 'Courier New', monospace;
+            font-size: 0.75rem; font-weight: bold; text-align: center; line-height: 1.3;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 20;
+            animation: popupPlaca 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .placa-cura::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            border-width: 10px 10px 0; border-style: solid; border-color: #f4eae1 transparent; display: block; width: 0;
+        }
+
+        @keyframes popupPlaca {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* MODAL DE SUCESSO FIEL À IMAGEM */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); display: flex; align-items: center;
+            justify-content: center; z-index: 99999; opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .modal-overlay.ativo { opacity: 1; pointer-events: auto; }
+
+        .bloco-vip-modal {
+            background-color: #0c0d0f; border: 2px solid #04d361; border-radius: 12px;
+            padding: 2.5rem 2rem; max-width: 550px; width: 90%; text-align: center;
+            box-shadow: 0px 0px 25px rgba(4, 211, 97, 0.2); transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;
+        }
+        .modal-overlay.ativo .bloco-vip-modal { transform: scale(1); }
+
+        .bloco-vip-modal h2 { color: #04d361; font-size: 1.8rem; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: sans-serif; }
+        .bloco-vip-modal p { color: #ffffff; font-weight: 600; font-size: 1.05rem; margin-bottom: 2rem; font-family: sans-serif; }
+
+        .btn-grupo-vip {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            text-decoration: none; color: #ffffff; font-weight: bold; font-size: 1.1rem;
+            padding: 0.9rem; border-radius: 8px; margin-bottom: 1rem; width: 100%;
+            box-sizing: border-box; transition: transform 0.2s, filter 0.2s; font-family: sans-serif;
+        }
+        .btn-grupo-vip:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        
+        .btn-vip-whatsapp { background-color: #22c55e; }
+        .btn-vip-telegram { background-color: #0ea5e9; }
+
+        .btn-fechar-modal {
+            position: absolute; top: 12px; right: 15px; background: none; border: none;
+            color: #8d8d99; font-size: 1.2rem; cursor: pointer; transition: color 0.2s;
+        }
+        .btn-fechar-modal:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- MODAL DE ACESSO INSTANTÂNEO VIP -->
+    <div id="modal-vip" class="modal-overlay">
+        <div class="bloco-vip-modal">
+            <button class="btn-fechar-modal" onclick="fecharModalVip()">✕</button>
+            <h2>🎉 Apoio Confirmado!</h2>
+            <p>Aqui estão seus links exclusivos de acesso:</p>
+            
+            <a href="https://chat.whatsapp.com/SEU_LINK_DO_WHATSAPP" target="_blank" class="btn-grupo-vip btn-vip-whatsapp">
+                🟢 Entrar no Grupo do WhatsApp VIP
+            </a>
+            <a href="https://t.me/SEU_LINK_DO_TELEGRAM" target="_blank" class="btn-grupo-vip btn-vip-telegram">
+                🔵 Entrar no Canal do Telegram VIP
+            </a>
+        </div>
+    </div>
+
+    <nav id="sidebar" class="sidebar-fechada">
+        <button id="btn-menu">☰</button>
+        <ul class="menu-links">
+            <li><a href="/">🏠 <span>Início</span></a></li>
+            <li><a href="/galeria">🖼️ <span>Galeria</span></a></li>
+            <li><a href="/apoie">🤝 <span>Apoie</span></a></li>
+            <li><a href="/comunidade">💬 <span>Comunidade</span></a></li>
+            <li><a href="/admin">⚙️ <span>Admin</span></a></li>
+        </ul>
+    </nav>
+
+    <div id="conteudo-principal" style="display: flex; flex-direction: column; min-height: 100vh;">
+        
+        <div style="flex: 1; padding: 0 1rem;">
+            <!-- CABEÇALHO -->
+            <header style="text-align: center; margin: 2rem auto 1.5rem auto; max-width: 600px;">
+                <h1 style="margin-bottom: 0.3rem;">🤝 Faça Parte Desse Projeto</h1>
+                <p style="color: #fafafd; font-size: 1.2rem; margin-bottom: 1.5rem;">Ajude a financiar o desenvolvimento e ganhe recompensas exclusivas!</p>
+                
+                <!-- CONTAINER DA META COM ELEMENTOS DO JOGO -->
+                <div class="container-meta-game" id="arena-batalha">
+                    
+                    <!-- HERÓI CARTOON EM VETOR SVG -->
+                    <div id="player-actor" class="actor">
+                        <svg viewBox="0 0 64 80" width="100%" height="100%">
+                            <!-- Chapéu Cowboy -->
+                            <ellipse cx="32" cy="18" rx="20" ry="4" fill="#a16207"/>
+                            <path d="M20,16 Q32,4 44,16 Z" fill="#78350f"/>
+                            <!-- Cabeça -->
+                            <circle cx="32" cy="26" r="8" fill="#ffedd5"/>
+                            <circle cx="30" cy="25" r="1" fill="#000"/>
+                            <circle cx="34" cy="25" r="1" fill="#000"/>
+                            <!-- Corpo/Jaqueta -->
+                            <path d="M22,34 L42,34 L40,58 L24,58 Z" fill="#1d4ed8"/>
+                            <line x1="32" y1="34" x2="32" y2="58" stroke="#1e3a8a" stroke-width="1.5"/>
+                            <!-- Pernas/Calça -->
+                            <rect x="24" y="58" width="6" height="18" fill="#d97706"/>
+                            <rect x="34" y="58" width="6" height="18" fill="#d97706"/>
+                            <!-- Botas -->
+                            <rect x="22" y="74" width="8" height="5" rx="2" fill="#451a03"/>
+                            <rect x="34" y="74" width="8" height="5" rx="2" fill="#451a03"/>
+                            <!-- Braço/Arma -->
+                            <path d="M38,40 Q48,34 52,38" stroke="#ffedd5" stroke-width="4" fill="none" stroke-linecap="round"/>
+                            <rect x="44" y="34" width="16" height="4" rx="1" fill="#4b5563"/>
+                            <rect x="42" y="36" width="4" height="6" fill="#78350f"/>
+                        </svg>
+                    </div>
+
+                    <!-- ZUMBI CARTOON EM VETOR SVG -->
+                    <div id="zombie-actor" class="actor">
+                        <svg viewBox="0 0 64 80" width="100%" height="100%">
+                            <!-- Cabelo bagunçado -->
+                            <path d="M20,22 Q32,10 44,22" stroke="#14532d" stroke-width="3" fill="none"/>
+                            <!-- Cabeça Verde -->
+                            <circle cx="32" cy="26" r="8" fill="#22c55e"/>
+                            <!-- Olhos Loucos Cartoon -->
+                            <circle cx="29" cy="25" r="2.5" fill="#fff"/>
+                            <circle cx="29" cy="25" r="1" fill="#000"/>
+                            <circle cx="35" cy="25" r="1.5" fill="#fff"/>
+                            <circle cx="35" cy="25" r="0.7" fill="#000"/>
+                            <!-- Boca Aberta -->
+                            <ellipse cx="32" cy="30" rx="3" ry="1.5" fill="#7f1d1d"/>
+                            <!-- Corpo Detonado -->
+                            <path d="M22,34 L42,34 L38,58 L26,58 Z" fill="#6b7280"/>
+                            <!-- Braços Esticados para Frente -->
+                            <path d="M24,38 L6,38" stroke="#22c55e" stroke-width="4.5" stroke-linecap="round"/>
+                            <path d="M24,44 L8,44" stroke="#22c55e" stroke-width="4.5" stroke-linecap="round"/>
+                            <!-- Pernas/Calça Rasgada -->
+                            <rect x="25" y="58" width="5" height="14" fill="#6b21a8"/>
+                            <rect x="34" y="58" width="5" height="11" fill="#6b21a8"/>
+                            <!-- Pés Descalços -->
+                            <rect x="23" y="70" width="7" height="4" rx="1" fill="#15803d"/>
+                            <rect x="34" y="67" width="7" height="4" rx="1" fill="#15803d"/>
+                        </svg>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.97rem; margin-bottom: 0.4rem;">
+                        <span style="color: #fff; font-weight: 500;">🚀 Meta: Terreno do Jogo</span>
+                        <span style="color: #8d8d99;"><strong id="valor-arrecadado" style="color: #04d361;">R$ 2.000</strong> de R$ 7.000 (<span id="porcentagem-texto">28</span>%)</span>
+                    </div>
+                    <!-- Barra de progresso -->
+                    <div style="width: 100%; height: 16px; background: #1a1a1e; border-radius: 8px; border: 1px solid #323238; overflow: visible; position: relative;">
+                        <div id="barra-progresso" style="width: 28.57%; height: 100%; background: linear-gradient(90deg, #8257e5, #04d361); border-radius: 6px; transition: width 1s ease-in-out;"></div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CARDS DE INSCRIÇÃO -->
+            <section class="container-apoio">
+                <!-- NÍVEL 1 -->
+                <div class="card-apoio">
+                    <div>
+                        <h2>☕ Apoiador Inicial</h2>
+                        <p class="preco">R$ 5 <span style="font-size: 0.9rem; color: #8d8d99;">/ único</span></p>
+                        <ul>
+                            <li>📜 Seu nome na lista oficial de créditos do jogo.</li>
+                            <li>💬 Cargo exclusivo no servidor do Discord.</li>
+                            <li>👀 Acesso antecipado aos posts do nosso Devlog.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div id="paypal-5" style="width: 100%;"></div>
+                        <button class="btn-checkout btn-pix" onclick="mostrarInfoPix(5, 'Apoiador Inicial')">
+                            <span style="color: #04d361;">📱</span> Pagar com Pix
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NÍVEL 2 -->
+                <div class="card-apoio" style="border-color: #8257e5; transform: scale(1.02);">
+                    <div>
+                        <span style="background: #8257e5; color: #fff; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; float: right;">MAIS POPULAR</span>
+                        <h2>💎 Desenvolvedor VIP</h2>
+                        <p class="preco">R$ 15 <span style="font-size: 0.9rem; color: #8d8d99;">/ mês</span></p>
+                        <ul>
+                            <li>✨ Tudo do nível anterior.</li>
+                            <li>🎮 Acesso garantido a builds Alpha/Beta fechadas do jogo.</li>
+                            <li>🔥 Links diretos para os grupos VIP (WhatsApp/Telegram).</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div id="paypal-15" style="width: 100%;"></div>
+                        <button class="btn-checkout btn-pix" onclick="mostrarInfoPix(15, 'Desenvolvedor VIP')">
+                            <span style="color: #04d361;">📱</span> Pagar com Pix
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NÍVEL 3 -->
+                <div class="card-apoio">
+                    <div>
+                        <h2>👑 Co-Criador Lendário</h2>
+                        <p class="preco">R$ 50 <span style="font-size: 0.9rem; color: #8d8d99;">/ único</span></p>
+                        <ul>
+                            <li>🌟 Tudo dos níveis anteriores.</li>
+                            <li>🗿 Seu nome eternizado em um Easter Egg ou parede dentro do próprio jogo!</li>
+                            <li>💻 Acesso ao download de códigos e assets usados no desenvolvimento.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div id="paypal-50" style="width: 100%;"></div>
+                        <button class="btn-checkout btn-pix" onclick="mostrarInfoPix(50, 'Co-Criador Lendário')">
+                            <span style="color: #04d361;">📱</span> Pagar com Pix
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- RODAPÉ -->
+        <footer style="width: 100%; max-width: 1200px; margin: 4rem auto 2rem auto; padding-top: 2rem; border-top: 1px solid #323238; text-align: center; color: #8d8d99; font-size: 0.85rem; clear: both;">
+            <p style="margin-bottom: 1.5rem;">Siga as redes oficiais do jogo para não perder nenhuma novidade!</p>
+            <div style="display: flex; justify-content: center; gap: 3rem;">
+                <a href="https://instagram.com/SEU_PERFIL" target="_blank" title="Instagram" class="social-link instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://youtube.com/SEU_CANAL" target="_blank" title="YouTube" class="social-link youtube"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://twitch.tv/SEU_CANAL" target="_blank" title="Twitch" class="social-link twitch"><i class="fa-brands fa-twitch"></i></a>
+                <a href="https://x.com/SEU_PERFIL" target="_blank" title="Twitter / X" class="social-link twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://discord.gg/SEU_SERVIDOR" target="_blank" title="Discord" class="social-link discord"><i class="fa-brands fa-discord"></i></a>
+            </div>
+            <p style="margin-top: 1.5rem; font-size: 0.75rem; color: #41414c;">© 2026 Devlog Gamedev. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- SDK DO PAYPAL -->
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=BRL&components=buttons"></script>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const btnMenu = document.getElementById('btn-menu');
+        if (btnMenu && sidebar) {
+            btnMenu.addEventListener('click', () => { sidebar.classList.toggle('sidebar-fechada'); });
+        }
+
+        let valorAtualGlobal = 2000; 
+        const metaTotal = 7000;
+
+        let htmlOriginalPlayer = document.getElementById('player-actor').innerHTML;
+        let htmlOriginalZombie = document.getElementById('zombie-actor').innerHTML;
+
+        function abrirModalVip() {
+            const modal = document.getElementById('modal-vip');
+            if (modal) modal.classList.add('ativo');
+        }
+
+        function fecharModalVip() {
+            const modal = document.getElementById('modal-vip');
+            if (modal) modal.classList.remove('ativo');
+            // Remove a placa flutuante ao fechar o modal para limpar a tela
+            const placaAntiga = document.getElementById('placa-cura-ativa');
+            if (placaAntiga) placaAntiga.remove();
+        }
+
+        // --- EXECUTA A BATALHA À DISTÂNCIA COM TRANSFORMÇÃO EM LÁPIDE ---
+        function executarBatalhaMeta(valorDoado) {
+            const player = document.getElementById('player-actor');
+            const zombie = document.getElementById('zombie-actor');
+            const barra = document.getElementById('barra-progresso');
+            const arena = document.getElementById('arena-batalha');
+            const textoValor = document.getElementById('valor-arrecadado');
+            const textoPorcentagem = document.getElementById('porcentagem-texto');
+
+            if (!player || !zombie) return;
+
+            // Limpa placas antigas antes de reiniciar
+            const placaAntiga = document.getElementById('placa-cura-ativa');
+            if (placaAntiga) placaAntiga.remove();
+
+            // Restaura o visual original
+            player.innerHTML = htmlOriginalPlayer;
+            zombie.innerHTML = htmlOriginalZombie;
+
+            player.style.display = 'block';
+            zombie.style.display = 'block';
+            player.style.animation = 'playerRun 1.2s forwards';
+            zombie.style.animation = 'zombieRun 1.2s forwards';
+
+            // No momento do tiro (1.2 segundos)
+            setTimeout(() => {
+                // Efeito do tiro cruzando a distância
+                player.innerHTML += `
+                    <div style="position: absolute; left: 55px; top: 36px; width: 220px; height: 3px; 
+                                background: linear-gradient(90deg, #facc15, #ef4444); z-index: 100;
+                                box-shadow: 0 0 8px #facc15;"></div>
+                    <div style="position:absolute; right:-25px; top:32px; font-size:1.8rem;">🔥</div>
+                `;
+                
+                // Transforma o zumbi em uma Lápide Cartoon em SVG cinza com rachaduras e cruz
+                zombie.innerHTML = `
+                    <svg viewBox="0 0 64 80" width="100%" height="100%">
+                        <!-- Base da Lápide -->
+                        <path d="M12,76 L52,76 L48,24 Q32,10 16,24 Z" fill="#6b7280" stroke="#374151" stroke-width="2"/>
+                        <!-- Detalhes de rachadura -->
+                        <path d="M22,28 L28,34 L24,40" stroke="#374151" stroke-width="1.5" fill="none"/>
+                        <!-- Desenho da Cruz na pedra -->
+                        <rect x="30" y="28" width="4" height="18" fill="#374151"/>
+                        <rect x="25" y="33" width="14" height="4" fill="#374151"/>
+                        <!-- Chão/Grama sob a lápide -->
+                        <ellipse cx="32" cy="74" rx="22" ry="4" fill="#15803d"/>
+                        <!-- Iniciais R.I.P -->
+                        <text x="32" y="58" fill="#374151" font-size="8px" font-weight="bold" text-anchor="middle" font-family="sans-serif">R.I.P</text>
+                    </svg>
+                `;
+
+                // Adiciona a placa de diálogo flutuante sobre a lápide
+                const placa = document.createElement('div');
+                placa.id = 'placa-cura-ativa';
+                placa.className = 'placa-cura';
+                placa.innerText = "Estamos em busca da cura para nossa cidade...";
+                arena.appendChild(placa);
+
+                setTimeout(() => {
+                    zombie.style.display = 'none';
+                    player.style.display = 'none';
+
+                    // Atualiza a barra de carregamento
+                    valorAtualGlobal += valorDoado;
+                    if(valorAtualGlobal > metaTotal) valorAtualGlobal = metaTotal;
+                    const novaPorcentagem = ((valorAtualGlobal / metaTotal) * 100).toFixed(2);
+                    
+                    barra.style.width = novaPorcentagem + "%";
+                    textoValor.innerText = "R$ " + valorAtualGlobal.toLocaleString('pt-BR');
+                    textoPorcentagem.innerText = Math.floor(novaPorcentagem);
+
+                    // Abre o modal VIP com os grupos
+                    abrirModalVip();
+
+                }, 1800); // Dá um tempo maior para o usuário ler a frase da lápide antes do modal abrir
+            }, 1200);
+        }
+
+        function mostrarInfoPix(valor, nivel) {
+            const chavePix = "suachavepix@email.com";
+            alert("Plano Escolhido: " + nivel + "\nValor: R$ " + valor + ",00\nChave PIX: " + chavePix + "\n\nFeche para ver o abate do zumbi e o recado na lápide!");
+            executarBatalhaMeta(valor);
+        }
+
+        try {
+            paypal.Buttons({
+                style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' },
+                createOrder: function(data, actions) { return actions.order.create({ purchase_units: [{ amount: { value: '5.00' } }] }); },
+                onApprove: function(data, actions) { return actions.order.capture().then(function() { executarBatalhaMeta(5); }); }
+            }).render('#paypal-5');
+
+            paypal.Buttons({
+                style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' },
+                createOrder: function(data, actions) { return actions.order.create({ purchase_units: [{ amount: { value: '15.00' } }] }); },
+                onApprove: function(data, actions) { return actions.order.capture().then(function() { executarBatalhaMeta(15); }); }
+            }).render('#paypal-15');
+
+            paypal.Buttons({
+                style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'pay' },
+                createOrder: function(data, actions) { return actions.order.create({ purchase_units: [{ amount: { value: '50.00' } }] }); },
+                onApprove: function(data, actions) { return actions.order.capture().then(function() { executarBatalhaMeta(50); }); }
+            }).render('#paypal-50');
+        } catch (e) { console.error(e); }
+    </script>
+</body>
+</html>
